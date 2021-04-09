@@ -3,17 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "start": "parcel serve ./src/index.html",
-    "build": "parcel build ./src/index.html -d ./build --no-cache --no-source-maps --public-url ./"
-  },
+  "scripts": {},
   "author": "Andrew Letuchiy <andrew.zen333@gmail.com>",
   "license": "ISC",
-  "devDependencies": {
-    "parcel": "^2.0.0-beta.2"
-  },
+  "devDependencies": {},
   "dependencies": {
-    "cheerio": "^1.0.0-rc.5",
-    "nightmare": "^3.0.2"
+    "@babel/cli": "^7.13.14",
+    "@babel/core": "^7.13.15",
+    "@babel/node": "^7.13.13",
+    "@babel/preset-env": "^7.13.15",
+    "chalk": "^4.1.0",
+    "cheerio": "^1.0.0-rc.6",
+    "puppeteer": "^8.0.0",
+    "transliteration": "^2.2.0"
   }
 }
