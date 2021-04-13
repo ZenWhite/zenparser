@@ -4,35 +4,53 @@ import chalk from 'chalk'
 import { getPageContent } from './utils/getPageContent.js'
 import { getLinks } from './utils/getLinks.js'
 import { saveData } from './handlers/saveData.js'
-import { slugify } from 'transliteration'
 
-const URL = 'https://lcsc.com';
+const main = async () => {
+    const url = 'https://lcsc.com'
 
-(async function main() {
     try {
-        const categories = await getLinks(`${URL}/products`, '.type-title')
-        const links = categories.map(category => URL + category)
+        const categories = await getLinks(`${url}/products`, '.type-title') // /products/Amplifiers_515.html
+        const links = [ categories.map(category => url + category)[0] ]
 
-        links.forEach(async (link) => {
-            const fileName = slugify(link.split('.html')[0])
-            const pageContent = await getPageContent(link)
-            const $ = cheerio.load(pageContent)
+        const constraint = {}
 
-            const detailsList = $('tr').map((_, elem) => ({
-                partnumber: $(elem).find('.template-mpn a').text(),
-                link: $(elem).find('.product-pdf').attr('href'),
-                description: $(elem).find('.description-title').text(),
-                manufacturer: $(elem).find('.brand-title').text(),
-                price: $('.product-price-panel-discount:first-child').text(),
-                availability: $(elem).find('.avali-stock-num').text()
-            })).get().filter(item => item.partnumber)
+        Promise.all(links.map((link) => getPageContent(link))).then(page => {
+            const $ = cheerio.load(page)
 
-            saveData(detailsList, fileName)
+            constraint[$('h1').text()] = Number($('.layui-laypage-last').attr("data-page"))
         })
 
-        console.log( chalk.green('Сбор данных завершён') )
+        console.log(constraint)
+
+        /*Promise.all(links.map((link) => getPageContent(link))).then(contents => {
+            const data = contents.map((content) => {
+                const $ = cheerio.load(content)
+
+                const limit = $('.layui-laypage-last').attr("data-page")
+
+                // get text from NODE -> check text for value in step
+
+                // click -> await render -> await parse
+
+                const parsed = $('tr').map((_, elem) => ({
+                        partnumber: $(elem).find('.template-mpn a').text(),
+                        link: $(elem).find('.product-pdf').attr('href'),
+                        description: $(elem).find('.description-title').text(),
+                        manufacturer: $(elem).find('.brand-title').text(),
+                        price: '',
+                        availability: $(elem).find('.avali-stock-num').text()
+                    })).get().filter(item => item?.partnumber)
+
+                return parsed.reduce((acc, curr) => ({ ...acc, [curr.partnumber]: curr }), {})
+            }, {}).reduce((acc, curr, index) => ({ ...acc, [index]: curr }), {})
+
+            saveData(data, 'data')
+        })*/
+
     } catch (err) {
         console.log(chalk.red('Что-то пошло не так!\n'))
         console.log(err)
     }
-})()
+}
+
+main()

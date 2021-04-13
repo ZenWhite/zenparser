@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./src/index.js"
+    "start": "node ./src/index.js",
+    "bundle": "node ./src/bundler.js"
   },
   "type": "module",
   "author": "Andrew Letuchiy <andrew.zen333@gmail.com>",
@@ -19,6 +20,7 @@
     "@babel/preset-env": "^7.13.15",
     "chalk": "^4.1.0",
     "cheerio": "^1.0.0-rc.6",
+    "glob": "^7.1.6",
     "puppeteer": "^8.0.0",
     "transliteration": "^2.2.0"
   }

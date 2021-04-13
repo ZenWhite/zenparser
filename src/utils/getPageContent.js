@@ -22,9 +22,10 @@ export const getPageContent = async (url) => {
         const browser = await puppeteer.launch(LAUNCH_PUPPETEER_OPTS)
         const page = await browser.newPage()
         await page.goto(url, PAGE_PUPPETEER_OPTS)
+        /*await page.click("a")
+        await page.waitForSelector("tr")*/
         const content = await page.content()
         browser.close()
-
         return content
     } catch(err) {
         throw err
