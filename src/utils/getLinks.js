@@ -1,11 +1,11 @@
 import cheerio from 'cheerio'
 
-import { getPageContent } from './getPageContent.js'
+import { getPage } from './getPageContent.js'
 
 export const getLinks = async (url, selector) => {
-    const pageContent = await getPageContent(url)
+    const page = await getPage(url)
 
-    const $ = cheerio.load(pageContent)
+    const $ = cheerio.load(page)
     
     return $(selector).map( (_, elem) => $(elem).attr('href') ).get()
 }

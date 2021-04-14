@@ -1,56 +1,56 @@
 import cheerio from 'cheerio'
 import chalk from 'chalk'
 
-import { getPageContent } from './utils/getPageContent.js'
+import { getPage } from './utils/getPageContent.js'
 import { getLinks } from './utils/getLinks.js'
 import { saveData } from './handlers/saveData.js'
 
 const main = async () => {
-    const url = 'https://lcsc.com'
+  const url = 'https://lcsc.com'
 
-    try {
-        const categories = await getLinks(`${url}/products`, '.type-title') // /products/Amplifiers_515.html
-        const links = [ categories.map(category => url + category)[0] ]
+  try {
+    const categories = await getLinks(`${url}/products`, '.type-title')
+    const links = [categories.map((category) => url + category)[4]]
 
-        const constraint = {}
+    let formatted = {}
 
-        Promise.all(links.map((link) => getPageContent(link))).then(page => {
-            const $ = cheerio.load(page)
+    for (const link of links) {
+      const page = await getPage(link)
 
-            constraint[$('h1').text()] = Number($('.layui-laypage-last').attr("data-page"))
+      const $ = cheerio.load(page)
+
+      const category = $('h1').text()
+      const amount = Number($('.layui-laypage-last').attr('data-page'))
+
+      const paginated = await getPage(link, amount)
+
+      const data = [page, ...paginated]
+        .map((html) => {
+          const $ = cheerio.load(html)
+
+          return $('tr')
+            .map((_, elem) => ({
+              partnumber: $(elem).find('.template-mpn a').text(),
+              link: $(elem).find('.product-pdf').attr('href'),
+              description: $(elem).find('.description-title').text(),
+              manufacturer: $(elem).find('.brand-title').text(),
+              price: '',
+              availability: $(elem).find('.avali-stock-num').text()
+            }))
+            .get()
+            .filter((item) => item?.partnumber)
+            .reduce((acc, curr) => ({ ...acc, [curr.partnumber]: curr }), {})
         })
+        .reduce((acc, curr) => ({ ...acc, [category]: [...acc[category], curr] }), { [category]: [] })
 
-        console.log(constraint)
-
-        /*Promise.all(links.map((link) => getPageContent(link))).then(contents => {
-            const data = contents.map((content) => {
-                const $ = cheerio.load(content)
-
-                const limit = $('.layui-laypage-last').attr("data-page")
-
-                // get text from NODE -> check text for value in step
-
-                // click -> await render -> await parse
-
-                const parsed = $('tr').map((_, elem) => ({
-                        partnumber: $(elem).find('.template-mpn a').text(),
-                        link: $(elem).find('.product-pdf').attr('href'),
-                        description: $(elem).find('.description-title').text(),
-                        manufacturer: $(elem).find('.brand-title').text(),
-                        price: '',
-                        availability: $(elem).find('.avali-stock-num').text()
-                    })).get().filter(item => item?.partnumber)
-
-                return parsed.reduce((acc, curr) => ({ ...acc, [curr.partnumber]: curr }), {})
-            }, {}).reduce((acc, curr, index) => ({ ...acc, [index]: curr }), {})
-
-            saveData(data, 'data')
-        })*/
-
-    } catch (err) {
-        console.log(chalk.red('Что-то пошло не так!\n'))
-        console.log(err)
+      formatted = { ...formatted, ...data }
     }
+
+    saveData(formatted, 'data')
+  } catch (err) {
+    console.log(chalk.red('Что-то пошло не так!\n'))
+    console.error(err)
+  }
 }
 
 main()
