@@ -9,8 +9,7 @@ const paths = {
 const load = async () => {
     const filenames = await readdir(paths.dir)
 
-    for await (const file of filenames.map((x) => readFile(paths.file(x), 'utf-8')))
-        console.log('\n', file)
+    for await (const file of filenames.map((x) => readFile(paths.file(x), 'utf-8'))) {}
 }
 
 load()
