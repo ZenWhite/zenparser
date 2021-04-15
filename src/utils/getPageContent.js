@@ -35,11 +35,11 @@ export const getPage = async (url, amount) => {
       const contents = []
 
       for (const n of range(amount)) {
-        await page.waitForSelector('#pagination')
+        await page.waitForSelector(`a[data-page="${n}"]`)
 
         await page.click(`a[data-page="${n}"]`)
-
-        await page.waitForSelector('#table_content')
+  
+        await page.waitForResponse('https://lcsc.com/api/products/search')
 
         const content = await page.content()
 
