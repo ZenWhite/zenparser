@@ -10,7 +10,7 @@ const main = async () => {
 
     try {
         const categories = await getLinks(`${url}/products`, '.type-title')
-        const links = [ categories.map((category) => url + category)[4] ]
+        const links = categories.map((category) => url + category)
 
         let formatted = {}
 
